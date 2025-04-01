@@ -1,0 +1,95 @@
+#include <stdio.h>
+
+#define MAX_USERS 100
+#define MAX_TRANSACTIONS 100
+
+typedef struct {
+    int userID;
+    int startTime;
+    int durations[MAX_TRANSACTIONS];
+    int numTransactions;
+} User;
+
+void sortUsersByStartTime(User *users, int numUsers) {
+    for (int i = 0; i < numUsers - 1; i++) {
+        for (int j = 0; j < numUsers - i - 1; j++) {
+            if (users[j].startTime > users[j + 1].startTime) {
+                User temp = users[j];
+                users[j] = users[j + 1];
+                users[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void sortDurations(int *durations, int numTransactions) {
+    for (int i = 0; i < numTransactions - 1; i++) {
+        for (int j = 0; j < numTransactions - i - 1; j++) {
+            if (durations[j] > durations[j + 1]) {
+                int temp = durations[j];
+                durations[j] = durations[j + 1];
+                durations[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void simulateTransactions(User *users, int numUsers) {
+    int currentTime = 0, totalWaitTime = 0, totalTransactions = 0;
+
+    for (int i = 0; i < numUsers; i++) {
+        User user = users[i];
+        int userWaitTime = 0;
+
+        sortDurations(user.durations, user.numTransactions);
+
+        for (int j = 0; j < user.numTransactions; j++) {
+            int startTransactionTime = currentTime > user.startTime ? currentTime : user.startTime;
+            int endTransactionTime = startTransactionTime + user.durations[j];
+
+            userWaitTime += startTransactionTime - user.startTime;
+
+            printf("User %d: Transaction %d starts at %d and ends at %d\n",
+                   user.userID, j + 1, startTransactionTime, endTransactionTime);
+
+            currentTime = endTransactionTime;
+        }
+
+        double userAvgWaitTime = (double)userWaitTime / user.numTransactions;
+        printf("User %d average waiting time: %.2f seconds\n", user.userID, userAvgWaitTime);
+
+        totalWaitTime += userWaitTime;
+        totalTransactions += user.numTransactions;
+    }
+
+    double totalAvgWaitTime = (double)totalWaitTime / totalTransactions;
+    printf("Total average waiting time for all users' transactions: %.2f seconds\n", totalAvgWaitTime);
+}
+
+int main() {
+    int numUsers;
+    User users[MAX_USERS];
+
+    printf("Enter number of users: ");
+    scanf("%d", &numUsers);
+
+    for (int i = 0; i < numUsers; i++) {
+        printf("\nEnter details for user %d:\n", i + 1);
+        printf("User ID: ");
+        scanf("%d", &users[i].userID);
+        printf("Starting time: ");
+        scanf("%d", &users[i].startTime);
+        printf("Number of transactions: ");
+        scanf("%d", &users[i].numTransactions);
+
+        printf("Enter the durations for the transactions: ");
+        for (int j = 0; j < users[i].numTransactions; j++) {
+            scanf("%d", &users[i].durations[j]);
+        }
+    }
+
+    sortUsersByStartTime(users, numUsers);
+    simulateTransactions(users, numUsers);
+
+    return 0;
+}
