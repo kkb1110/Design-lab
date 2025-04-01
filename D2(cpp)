@@ -1,0 +1,128 @@
+#include <iostream>
+
+using namespace std;
+
+class User {
+public:
+    int userID;
+    int startTime;
+    int durations[100]; // Assuming max 100 transactions per user
+    int numTransactions;
+
+    // Constructor
+    User() {
+        userID = 0;
+        startTime = 0;
+        numTransactions = 0;
+    }
+
+    // Function to input user data
+    void inputUserData() {
+        cout << "\nEnter User ID: ";
+        cin >> userID;
+        cout << "Enter Starting Time: ";
+        cin >> startTime;
+        cout << "Enter Number of Transactions: ";
+        cin >> numTransactions;
+
+        cout << "Enter the durations for the transactions: ";
+        for (int i = 0; i < numTransactions; i++) {
+            cin >> durations[i];
+        }
+    }
+
+    // Function to sort transaction durations using Bubble Sort
+    void sortDurations() {
+        for (int i = 0; i < numTransactions - 1; i++) {
+            for (int j = 0; j < numTransactions - i - 1; j++) {
+                if (durations[j] > durations[j + 1]) {
+                    // Swap durations[j] and durations[j + 1]
+                    int temp = durations[j];
+                    durations[j] = durations[j + 1];
+                    durations[j + 1] = temp;
+                }
+            }
+        }
+    }
+};
+
+// Class to manage all users and simulate transactions
+class TransactionManager {
+private:
+    User users[100]; // Assuming a max of 100 users
+    int numUsers;
+
+public:
+    // Constructor
+    TransactionManager() {
+        numUsers = 0;
+    }
+
+    // Function to input all users
+    void inputUsers() {
+        cout << "Enter number of users: ";
+        cin >> numUsers;
+
+        for (int i = 0; i < numUsers; i++) {
+            cout << "\nEnter details for User " << (i + 1) << ":";
+            users[i].inputUserData();
+        }
+    }
+
+    // Function to sort users by start time using Bubble Sort
+    void sortUsersByStartTime() {
+        for (int i = 0; i < numUsers - 1; i++) {
+            for (int j = 0; j < numUsers - i - 1; j++) {
+                if (users[j].startTime > users[j + 1].startTime) {
+                    // Swap users[j] and users[j + 1]
+                    User temp = users[j];
+                    users[j] = users[j + 1];
+                    users[j + 1] = temp;
+                }
+            }
+        }
+    }
+
+    // Function to simulate transactions
+    void simulateTransactions() {
+        int currentTime = 0;
+        int totalWaitTime = 0;
+        int totalTransactions = 0;
+
+        for (int i = 0; i < numUsers; i++) {
+            users[i].sortDurations(); // Sort transactions for the current user
+            int userWaitTime = 0;
+
+            for (int j = 0; j < users[i].numTransactions; j++) {
+                int startTransactionTime = (currentTime > users[i].startTime) ? currentTime : users[i].startTime;
+                int endTransactionTime = startTransactionTime + users[i].durations[j];
+
+                userWaitTime += startTransactionTime - users[i].startTime;
+
+                cout << "User " << users[i].userID << ": Transaction " << (j + 1)
+                     << " starts at " << startTransactionTime << " and ends at " << endTransactionTime << endl;
+
+                currentTime = endTransactionTime;
+            }
+
+            double userAvgWaitTime = (double)userWaitTime / users[i].numTransactions;
+            cout << "\nUser " << users[i].userID << " average waiting time: " << userAvgWaitTime << " seconds\n\n";
+
+            totalWaitTime += userWaitTime;
+            totalTransactions += users[i].numTransactions;
+        }
+
+        double totalAvgWaitTime = (double)totalWaitTime / totalTransactions;
+        cout << "Total average waiting time for all users' transactions: " << totalAvgWaitTime << " seconds\n";
+    }
+};
+
+int main() {
+    TransactionManager manager;
+
+    manager.inputUsers();
+    manager.sortUsersByStartTime();
+    manager.simulateTransactions();
+
+    return 0;
+}
